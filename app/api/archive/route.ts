@@ -90,7 +90,10 @@ export async function GET() {
         return null;
       })
       .filter(Boolean)
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      .sort((a, b) => {
+        if (!a || !b) return 0;
+        return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+      });
 
     return NextResponse.json({
       success: true,
