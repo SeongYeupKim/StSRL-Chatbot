@@ -131,7 +131,7 @@ Weekly Progress:
 ${exportData.weeklyProgress.map((wp: any) => `- Week ${wp.week}: ${wp.promptsCompleted} prompts`).join('\n')}
 
 Responses:
-${exportData.responses.map((r: any, i) => `${i + 1}. Week ${r.week} - ${r.component}: "${r.response}"`).join('\n')}
+${exportData.responses.map((r: any, i: number) => `${i + 1}. Week ${r.week} - ${r.component}: "${r.response}"`).join('\n')}
 
 Generated on: ${new Date().toISOString()}
 `;
