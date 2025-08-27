@@ -128,7 +128,7 @@ SRL Component Engagement:
 ${Object.entries(exportData.srlComponentStats).map(([component, count]) => `- ${component}: ${count} responses`).join('\n')}
 
 Weekly Progress:
-${exportData.weeklyProgress.map(wp => `- Week ${wp.week}: ${wp.promptsCompleted} prompts`).join('\n')}
+${exportData.weeklyProgress.map((wp: any) => `- Week ${wp.week}: ${wp.promptsCompleted} prompts`).join('\n')}
 
 Responses:
 ${exportData.responses.map((r, i) => `${i + 1}. Week ${r.week} - ${r.component}: "${r.response}"`).join('\n')}
