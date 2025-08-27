@@ -125,13 +125,13 @@ Activity Summary:
 - SRL Components Covered: ${Object.keys(exportData.srlComponentStats).filter(key => exportData.srlComponentStats[key] > 0).join(', ')}
 
 SRL Component Engagement:
-${Object.entries(exportData.srlComponentStats).map(([component, count]) => `- ${component}: ${count} responses`).join('\n')}
+${Object.entries(exportData.srlComponentStats).map(([component, count]: [string, any]) => `- ${component}: ${count} responses`).join('\n')}
 
 Weekly Progress:
 ${exportData.weeklyProgress.map((wp: any) => `- Week ${wp.week}: ${wp.promptsCompleted} prompts`).join('\n')}
 
 Responses:
-${exportData.responses.map((r, i) => `${i + 1}. Week ${r.week} - ${r.component}: "${r.response}"`).join('\n')}
+${exportData.responses.map((r: any, i) => `${i + 1}. Week ${r.week} - ${r.component}: "${r.response}"`).join('\n')}
 
 Generated on: ${new Date().toISOString()}
 `;
