@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+  font-family: 'Inter', sans-serif;
+}
+
+@layer components {
+  .chat-bubble {
+    @apply max-w-xs lg:max-w-md px-4 py-2 rounded-lg shadow-sm;
+  }
+  
+  .chat-bubble-user {
+    @apply bg-primary-500 text-white ml-auto;
+  }
+  
+  .chat-bubble-bot {
+    @apply bg-gray-100 text-gray-800;
+  }
+  
+  .srl-badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  
+  .srl-badge-metacognition {
+    @apply bg-srl-metacognition text-white;
+  }
+  
+  .srl-badge-strategy {
+    @apply bg-srl-strategy text-white;
+  }
+  
+  .srl-badge-motivation {
+    @apply bg-srl-motivation text-white;
+  }
+  
+  .srl-badge-content {
+    @apply bg-srl-content text-white;
+  }
+  
+  .srl-badge-management {
+    @apply bg-srl-management text-white;
+  }
+}
