@@ -39,6 +39,7 @@ export interface SRLFeedback {
   feedback: string;
   suggestions: string[];
   nextSteps: string[];
+  followUpQuestion?: string;
 }
 
 export interface WeekData {

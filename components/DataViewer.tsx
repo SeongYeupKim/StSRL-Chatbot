@@ -180,7 +180,7 @@ export default function DataViewer() {
               
               <div>
                 <h4 className="font-medium text-gray-900">SRL Component Engagement</h4>
-                {Object.entries(selectedSession.srlComponentStats).map(([component, count]) => (
+                {Object.entries(selectedSession.srlComponentStats).map(([component, count]: [string, any]) => (
                   <p key={component} className="text-sm text-gray-600">
                     {component}: {count} responses
                   </p>
