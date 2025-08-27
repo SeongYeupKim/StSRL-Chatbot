@@ -17,6 +17,7 @@ export default function PromptCard({ prompt, onResponse, onFinishChat, disabled 
   const [sliderValue, setSliderValue] = useState<number>(
     prompt.minValue ? Math.floor((prompt.minValue + (prompt.maxValue || 10)) / 2) : 5
   );
+  const [additionalResponse, setAdditionalResponse] = useState<string>('');
 
   const getComponentColor = (component: SRLComponent) => {
     const colors = {
@@ -61,12 +62,18 @@ export default function PromptCard({ prompt, onResponse, onFinishChat, disabled 
         break;
     }
 
+    // Add additional response if provided
+    if (additionalResponse.trim()) {
+      finalResponse += ` | Additional thoughts: ${additionalResponse}`;
+    }
+
     if (finalResponse.trim()) {
       onResponse(finalResponse);
       // Reset form
       setResponse('');
       setSelectedOption('');
       setSliderValue(prompt.minValue ? Math.floor((prompt.minValue + (prompt.maxValue || 10)) / 2) : 5);
+      setAdditionalResponse('');
     }
   };
 
@@ -212,6 +219,23 @@ export default function PromptCard({ prompt, onResponse, onFinishChat, disabled 
 
       <div className="space-y-4">
         {renderInput()}
+        
+        {/* Additional chatbox for non-open-ended prompts */}
+        {prompt.type !== 'open-ended' && (
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              Additional thoughts (optional):
+            </label>
+            <textarea
+              value={additionalResponse}
+              onChange={(e) => setAdditionalResponse(e.target.value)}
+              placeholder="Share any additional thoughts, explanations, or reflections..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 resize-none"
+              rows={2}
+              disabled={disabled}
+            />
+          </div>
+        )}
         
         <div className="flex justify-between">
           {onFinishChat && (
