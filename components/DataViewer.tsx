@@ -238,6 +238,8 @@ export default function DataViewer() {
           // LMS-style CSV: One row per student with aggregated data
           const csvHeaders = [
             'Student ID',
+            'First Name',
+            'Last Name',
             'Total Sessions',
             'Total Responses',
             'Total Messages',
@@ -294,6 +296,8 @@ export default function DataViewer() {
 
           const csvRows = Array.from(studentData.values()).map(student => [
             student.studentId,
+            student.firstName || '', // TODO: Fetch from users collection
+            student.lastName || '', // TODO: Fetch from users collection
             student.totalSessions,
             student.totalResponses,
             student.totalMessages,

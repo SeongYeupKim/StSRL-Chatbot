@@ -11,9 +11,10 @@ import WeekSelector from './WeekSelector';
 
 interface ChatInterfaceProps {
   userId: string;
+  firstName?: string;
 }
 
-export default function ChatInterface({ userId }: ChatInterfaceProps) {
+export default function ChatInterface({ userId, firstName }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [currentWeek, setCurrentWeek] = useState<number | null>(null);
   const [currentPrompt, setCurrentPrompt] = useState<SRLPrompt | null>(null);
@@ -33,15 +34,16 @@ export default function ChatInterface({ userId }: ChatInterfaceProps) {
   useEffect(() => {
     // Initialize chat with welcome message
     if (messages.length === 0) {
+      const displayName = firstName || userId;
       const welcomeMessage: ChatMessage = {
         id: 'welcome',
         timestamp: new Date(),
         sender: 'bot',
-        content: `Hello ${userId}! I'm your SRL Learning Assistant. I'm here to help you develop better self-regulated learning skills. Which week are you currently in?`
+        content: `Hello ${displayName}! I'm your SRL Learning Assistant. I'm here to help you develop better self-regulated learning skills. Which week are you currently in?`
       };
       setMessages([welcomeMessage]);
     }
-  }, [userId, messages.length]);
+  }, [userId, firstName, messages.length]);
 
   const handleWeekSelection = (week: number) => {
     setCurrentWeek(week);
@@ -261,11 +263,12 @@ export default function ChatInterface({ userId }: ChatInterfaceProps) {
     setCurrentWeek(null);
     setCurrentPrompt(null);
     setShowWeekSelector(true);
+    const displayName = firstName || userId;
     setMessages([{
       id: 'welcome',
       timestamp: new Date(),
       sender: 'bot',
-      content: `Hello ${userId}! I'm your SRL Learning Assistant. I'm here to help you develop better self-regulated learning skills. Which week are you currently in?`
+      content: `Hello ${displayName}! I'm your SRL Learning Assistant. I'm here to help you develop better self-regulated learning skills. Which week are you currently in?`
     }]);
   };
 

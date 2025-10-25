@@ -89,7 +89,7 @@ export default function StudentDashboard({ userId }: StudentDashboardProps) {
           >
             ← Back to Dashboard
           </button>
-          <ChatInterface userId={userId} />
+          <ChatInterface userId={userId} firstName={userData?.firstName || ''} />
         </div>
       </div>
     );
