@@ -1,4 +1,5 @@
 import AdminDashboard from '@/components/AdminDashboard';
+import StudentManagement from '@/components/StudentManagement';
 
 export default function AdminPage() {
   return (
@@ -11,7 +12,10 @@ export default function AdminPage() {
           </p>
         </div>
         
-        <AdminDashboard />
+        <div className="space-y-8">
+          <StudentManagement />
+          <AdminDashboard />
+        </div>
       </div>
     </div>
   );

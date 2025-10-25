@@ -1,47 +1,60 @@
 'use client';
 
-import { useState } from 'react';
-import ChatInterface from '@/components/ChatInterface';
-import LoginForm from '@/components/LoginForm';
-import Header from '@/components/Header';
+import { useState, useEffect } from 'react';
+import { auth } from '@/lib/firebase';
+import { onAuthStateChanged, User } from 'firebase/auth';
+import AuthForm from '@/components/AuthForm';
+import StudentDashboard from '@/components/StudentDashboard';
 
 export default function Home() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userId, setUserId] = useState<string>('');
+  const [user, setUser] = useState<User | null>(null);
+  const [userType, setUserType] = useState<'student' | 'admin' | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleLogin = (user: string) => {
-    setUserId(user);
-    setIsLoggedIn(true);
-  };
-
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setUserId('');
-  };
-
-  return (
-    <div className="min-h-screen">
-      <Header isLoggedIn={isLoggedIn} userId={userId} onLogout={handleLogout} />
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setUser(firebaseUser);
       
-      <main className="container mx-auto px-4 py-8">
-        {!isLoggedIn ? (
-          <div className="max-w-md mx-auto">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">
-                SRL Learning Assistant
-              </h1>
-              <p className="text-gray-600">
-                Welcome to your personalized Self-Regulated Learning chatbot. 
-                Get started by logging in to access your learning prompts and receive 
-                AI-powered feedback to enhance your study skills.
-              </p>
-            </div>
-            <LoginForm onLogin={handleLogin} />
-          </div>
-        ) : (
-          <ChatInterface userId={userId} />
-        )}
-      </main>
+      if (firebaseUser) {
+        // TODO: Determine user type from Firestore
+        setUserType('student');
+      } else {
+        setUserType(null);
+      }
+      
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleAuthSuccess = (userId: string, type: 'student' | 'admin') => {
+    setUserType(type);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <AuthForm onAuthSuccess={handleAuthSuccess} />;
+  }
+
+  if (userType === 'student') {
+    return <StudentDashboard userId={user.uid} />;
+  }
+
+  // TODO: Add admin dashboard
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">Welcome</h1>
+        <p className="text-gray-600">Dashboard coming soon...</p>
+      </div>
     </div>
   );
 }
