@@ -58,7 +58,10 @@ export async function GET() {
       sessionId: archive.sessionId,
       totalMessages: archive.exportData.totalMessages,
       responses: archive.exportData.responses.length,
-      srlComponentStats: archive.exportData.srlComponentStats
+      srlComponentStats: archive.exportData.srlComponentStats,
+      // Add detailed response data for CSV export
+      detailedResponses: archive.exportData.responses,
+      weeklyProgress: archive.exportData.weeklyProgress
     }));
 
     return NextResponse.json({

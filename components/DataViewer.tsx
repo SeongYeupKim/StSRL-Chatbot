@@ -220,36 +220,59 @@ export default function DataViewer() {
           URL.revokeObjectURL(url);
           document.body.removeChild(a);
         } else if (format === 'csv') {
-          // Create CSV format
+          // Create detailed CSV format with prompt/response data
           const csvHeaders = [
             'Session ID',
             'User ID',
             'Date',
-            'Total Messages',
-            'Responses',
-            'Metacognition',
-            'Strategy',
-            'Motivation',
-            'Content',
-            'Management'
+            'Week',
+            'Prompt ID',
+            'SRL Component',
+            'Question',
+            'Student Response',
+            'AI Feedback',
+            'Response Timestamp'
           ];
 
-          const csvRows = allSessions.map((session: any) => [
-            session.id,
-            session.userId,
-            session.date,
-            session.totalMessages,
-            session.responses,
-            session.srlComponentStats.metacognition,
-            session.srlComponentStats.strategy,
-            session.srlComponentStats.motivation,
-            session.srlComponentStats.content,
-            session.srlComponentStats.management
-          ]);
+          const csvRows: any[] = [];
+          
+          allSessions.forEach((session: any) => {
+            if (session.detailedResponses && session.detailedResponses.length > 0) {
+              // Create a row for each prompt/response
+              session.detailedResponses.forEach((response: any) => {
+                csvRows.push([
+                  session.id,
+                  session.userId,
+                  session.date,
+                  response.week,
+                  response.promptId,
+                  response.component,
+                  response.question,
+                  response.response,
+                  response.feedback,
+                  response.timestamp
+                ]);
+              });
+            } else {
+              // Fallback: create a summary row if no detailed responses
+              csvRows.push([
+                session.id,
+                session.userId,
+                session.date,
+                'N/A',
+                'N/A',
+                'N/A',
+                'N/A',
+                'N/A',
+                'N/A',
+                'N/A'
+              ]);
+            }
+          });
 
           const csvContent = [
             csvHeaders.join(','),
-            ...csvRows.map((row: any[]) => row.map((cell: any) => `"${cell}"`).join(','))
+            ...csvRows.map((row: any[]) => row.map((cell: any) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
           ].join('\n');
 
           const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -480,6 +503,11 @@ export default function DataViewer() {
                           <span>{session.date}</span>
                           <span>{session.responses} responses</span>
                           <span>{session.totalMessages} messages</span>
+                          {session.weeklyProgress && session.weeklyProgress.length > 0 && (
+                            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                              Weeks: {session.weeklyProgress.map((wp: any) => wp.week).join(', ')}
+                            </span>
+                          )}
                           {viewMode === 'aggregated' && (
                             <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
                               Aggregated
