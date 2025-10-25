@@ -208,7 +208,7 @@ export default function DataViewer() {
     }
   };
 
-  const exportAllData = async (format: 'json' | 'csv') => {
+  const exportAllData = async (format: 'json' | 'csv' | 'csv-student' | 'csv-response') => {
     try {
       const response = await fetch('/api/archive');
       if (response.ok) {
@@ -234,8 +234,95 @@ export default function DataViewer() {
           a.click();
           URL.revokeObjectURL(url);
           document.body.removeChild(a);
-        } else if (format === 'csv') {
-          // Create detailed CSV format with prompt/response data
+        } else if (format === 'csv-student') {
+          // LMS-style CSV: One row per student with aggregated data
+          const csvHeaders = [
+            'Student ID',
+            'Total Sessions',
+            'Total Responses',
+            'Total Messages',
+            'Weeks Participated',
+            'Metacognition Responses',
+            'Strategy Responses',
+            'Motivation Responses',
+            'Content Responses',
+            'Management Responses',
+            'First Session Date',
+            'Last Session Date'
+          ];
+
+          // Aggregate data by student
+          const studentData = new Map<string, any>();
+          
+          allSessions.forEach((session: any) => {
+            if (!studentData.has(session.userId)) {
+              studentData.set(session.userId, {
+                studentId: session.userId,
+                totalSessions: 0,
+                totalResponses: 0,
+                totalMessages: 0,
+                weeks: new Set(),
+                srlStats: { metacognition: 0, strategy: 0, motivation: 0, content: 0, management: 0 },
+                firstDate: session.date,
+                lastDate: session.date
+              });
+            }
+            
+            const student = studentData.get(session.userId)!;
+            student.totalSessions++;
+            student.totalResponses += session.responses;
+            student.totalMessages += session.totalMessages;
+            
+            // Add weeks
+            if (session.weeklyProgress) {
+              session.weeklyProgress.forEach((wp: any) => {
+                student.weeks.add(wp.week);
+              });
+            }
+            
+            // Aggregate SRL stats
+            student.srlStats.metacognition += session.srlComponentStats.metacognition;
+            student.srlStats.strategy += session.srlComponentStats.strategy;
+            student.srlStats.motivation += session.srlComponentStats.motivation;
+            student.srlStats.content += session.srlComponentStats.content;
+            student.srlStats.management += session.srlComponentStats.management;
+            
+            // Update dates
+            if (session.date < student.firstDate) student.firstDate = session.date;
+            if (session.date > student.lastDate) student.lastDate = session.date;
+          });
+
+          const csvRows = Array.from(studentData.values()).map(student => [
+            student.studentId,
+            student.totalSessions,
+            student.totalResponses,
+            student.totalMessages,
+                         Array.from(student.weeks as Set<number>).sort((a, b) => a - b).join(', '),
+            student.srlStats.metacognition,
+            student.srlStats.strategy,
+            student.srlStats.motivation,
+            student.srlStats.content,
+            student.srlStats.management,
+            student.firstDate,
+            student.lastDate
+          ]);
+
+          const csvContent = [
+            csvHeaders.join(','),
+            ...csvRows.map((row: any[]) => row.map((cell: any) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+          ].join('\n');
+
+          const blob = new Blob([csvContent], { type: 'text/csv' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `srl_student_data_${new Date().toISOString().split('T')[0]}.csv`;
+          document.body.appendChild(a);
+          a.click();
+          URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        } else if (format === 'csv-response' || format === 'csv') {
+          // Response-level CSV: One row per prompt/response
           const csvHeaders = [
             'Session ID',
             'User ID',
@@ -294,7 +381,7 @@ export default function DataViewer() {
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = `srl_research_data_${new Date().toISOString().split('T')[0]}.csv`;
+          a.download = `srl_response_log_${new Date().toISOString().split('T')[0]}.csv`;
           document.body.appendChild(a);
           a.click();
           URL.revokeObjectURL(url);
@@ -326,13 +413,31 @@ export default function DataViewer() {
             <BarChart3 className="h-4 w-4" />
             <span>Export All JSON</span>
           </button>
-          <button
-            onClick={() => exportAllData('csv')}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
-          >
-            <BarChart3 className="h-4 w-4" />
-            <span>Export All CSV</span>
-          </button>
+          <div className="relative group">
+            <button
+              onClick={() => exportAllData('csv')}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+            >
+              <BarChart3 className="h-4 w-4" />
+              <span>Export All CSV</span>
+            </button>
+            <div className="hidden group-hover:block absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-lg border z-10">
+              <div className="p-2">
+                <button
+                  onClick={() => exportAllData('csv-student')}
+                  className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded"
+                >
+                  📊 Student-level (LMS style)
+                </button>
+                <button
+                  onClick={() => exportAllData('csv-response')}
+                  className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded"
+                >
+                  📝 Response-level (Detailed log)
+                </button>
+              </div>
+            </div>
+          </div>
           <button
             onClick={fetchSessions}
             className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
