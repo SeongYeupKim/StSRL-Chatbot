@@ -28,9 +28,10 @@ export default function AuthForm({ onAuthSuccess }: AuthFormProps) {
       const user = userCredential.user;
 
       await setDoc(doc(db, 'users', user.uid), {
-        userId: user.uid,
+        userId: studentId, // Use student ID as userId
+        firebaseUid: user.uid,
         email: email,
-        studentId: studentId || email.split('@')[0],
+        studentId: studentId,
         role: 'student',
         createdAt: new Date().toISOString(),
         lastActive: new Date().toISOString()
@@ -119,7 +120,7 @@ export default function AuthForm({ onAuthSuccess }: AuthFormProps) {
               onChange={(e) => setEmail(e.target.value)}
               required
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="your.email@example.com"
+              placeholder="your.email@psu.edu"
             />
           </div>
 
@@ -132,8 +133,9 @@ export default function AuthForm({ onAuthSuccess }: AuthFormProps) {
                 type="text"
                 value={studentId}
                 onChange={(e) => setStudentId(e.target.value)}
+                required
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="e.g., abc1234 (optional)"
+                placeholder="e.g., abc1234"
               />
             </div>
           )}
