@@ -193,31 +193,75 @@ export default function DataViewer() {
     }
   };
 
-  const exportAllData = async () => {
+  const exportAllData = async (format: 'json' | 'csv') => {
     try {
       const response = await fetch('/api/archive');
       if (response.ok) {
         const data = await response.json();
         const allSessions = data.sessions || [];
         
-        // Create comprehensive export data
-        const exportData = {
-          exportDate: new Date().toISOString(),
-          totalSessions: allSessions.length,
-          uniqueUsers: new Set(allSessions.map((s: any) => s.userId)).size,
-          sessions: allSessions,
-          aggregatedByUser: aggregateSessionsByUser(allSessions)
-        };
+        if (format === 'json') {
+          // Create comprehensive export data for JSON
+          const exportData = {
+            exportDate: new Date().toISOString(),
+            totalSessions: allSessions.length,
+            uniqueUsers: new Set(allSessions.map((s: any) => s.userId)).size,
+            sessions: allSessions,
+            aggregatedByUser: aggregateSessionsByUser(allSessions)
+          };
 
-        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `srl_research_data_${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(a);
-        a.click();
-        URL.revokeObjectURL(url);
-        document.body.removeChild(a);
+          const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `srl_research_data_${new Date().toISOString().split('T')[0]}.json`;
+          document.body.appendChild(a);
+          a.click();
+          URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        } else if (format === 'csv') {
+          // Create CSV format
+          const csvHeaders = [
+            'Session ID',
+            'User ID',
+            'Date',
+            'Total Messages',
+            'Responses',
+            'Metacognition',
+            'Strategy',
+            'Motivation',
+            'Content',
+            'Management'
+          ];
+
+          const csvRows = allSessions.map((session: any) => [
+            session.id,
+            session.userId,
+            session.date,
+            session.totalMessages,
+            session.responses,
+            session.srlComponentStats.metacognition,
+            session.srlComponentStats.strategy,
+            session.srlComponentStats.motivation,
+            session.srlComponentStats.content,
+            session.srlComponentStats.management
+          ]);
+
+          const csvContent = [
+            csvHeaders.join(','),
+            ...csvRows.map(row => row.map(cell => `"${cell}"`).join(','))
+          ].join('\n');
+
+          const blob = new Blob([csvContent], { type: 'text/csv' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `srl_research_data_${new Date().toISOString().split('T')[0]}.csv`;
+          document.body.appendChild(a);
+          a.click();
+          URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        }
       }
     } catch (error) {
       console.error('Error exporting all data:', error);
@@ -238,11 +282,18 @@ export default function DataViewer() {
         <h2 className="text-2xl font-bold text-gray-900">Research Data Archive</h2>
         <div className="flex items-center space-x-2">
           <button
-            onClick={exportAllData}
+            onClick={() => exportAllData('json')}
             className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2"
           >
             <BarChart3 className="h-4 w-4" />
-            <span>Export All</span>
+            <span>Export All JSON</span>
+          </button>
+          <button
+            onClick={() => exportAllData('csv')}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+          >
+            <BarChart3 className="h-4 w-4" />
+            <span>Export All CSV</span>
           </button>
           <button
             onClick={fetchSessions}
@@ -423,7 +474,7 @@ export default function DataViewer() {
                       <User className="h-5 w-5 text-gray-400" />
                       <div>
                         <p className="text-sm font-medium text-gray-900">
-                          Student {session.userId}
+                          {session.userId}
                         </p>
                         <div className="flex items-center space-x-4 text-sm text-gray-500">
                           <span>{session.date}</span>
