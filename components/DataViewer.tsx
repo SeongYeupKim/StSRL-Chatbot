@@ -19,6 +19,21 @@ interface ArchivedSession {
     content: number;
     management: number;
   };
+  weeklyProgress?: Array<{
+    week: number;
+    promptsCompleted: number;
+    averageResponseLength: number;
+    componentsCovered: string[];
+  }>;
+  detailedResponses?: Array<{
+    promptId: string;
+    week: number;
+    component: string;
+    question: string;
+    response: string;
+    feedback: string;
+    timestamp: string;
+  }>;
 }
 
 export default function DataViewer() {
