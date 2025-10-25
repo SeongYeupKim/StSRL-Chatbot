@@ -1,4 +1,4 @@
-import { LogOut, User, Brain, Database, BarChart3 } from 'lucide-react';
+import { LogOut, User, Brain, Database, BarChart3, TrendingUp } from 'lucide-react';
 
 interface HeaderProps {
   isLoggedIn: boolean;
@@ -40,6 +40,13 @@ export default function Header({ isLoggedIn, userId, onLogout }: HeaderProps) {
               >
                 <BarChart3 className="h-4 w-4" />
                 <span>Admin</span>
+              </a>
+              <a
+                href="/research"
+                className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <TrendingUp className="h-4 w-4" />
+                <span>Research</span>
               </a>
               <button
                 onClick={onLogout}
