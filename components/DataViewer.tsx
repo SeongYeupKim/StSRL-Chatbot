@@ -249,7 +249,7 @@ export default function DataViewer() {
 
           const csvContent = [
             csvHeaders.join(','),
-            ...csvRows.map(row => row.map(cell => `"${cell}"`).join(','))
+            ...csvRows.map((row: any[]) => row.map((cell: any) => `"${cell}"`).join(','))
           ].join('\n');
 
           const blob = new Blob([csvContent], { type: 'text/csv' });
