@@ -16,7 +16,8 @@ Replace `yourusername` with your actual GitHub username in these commands:
 
 ```bash
 # Update the remote URL with your actual username
-git remote set-url origin https://github.com/YOUR_USERNAME/srl-chatbot.git
+git remote set-url origin ho
+https://github.com/YOUR_USERNAME/srl-chatbot.git
 
 # Push to GitHub
 git push -u origin main

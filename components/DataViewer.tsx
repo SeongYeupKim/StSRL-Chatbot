@@ -4,10 +4,21 @@ import { useState, useEffect } from 'react';
 import { Download, Eye, FileText, Calendar, User } from 'lucide-react';
 
 interface ArchivedSession {
+  id: string;
   filename: string;
   userId: string;
   timestamp: string;
   date: string;
+  sessionId: string;
+  totalMessages: number;
+  responses: number;
+  srlComponentStats: {
+    metacognition: number;
+    strategy: number;
+    motivation: number;
+    content: number;
+    management: number;
+  };
 }
 
 export default function DataViewer() {
@@ -34,15 +45,15 @@ export default function DataViewer() {
     }
   };
 
-  const downloadFile = async (filename: string, type: 'json' | 'csv' | 'report') => {
+  const downloadFile = async (archiveId: string, type: 'json' | 'csv' | 'report') => {
     try {
-      const response = await fetch(`/api/archive/download?file=${filename}&type=${type}`);
+      const response = await fetch(`/api/archive/download?id=${archiveId}&type=${type}`);
       if (response.ok) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = filename;
+        a.download = `${archiveId}_${type}`;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
@@ -53,9 +64,9 @@ export default function DataViewer() {
     }
   };
 
-  const viewSessionDetails = async (filename: string) => {
+  const viewSessionDetails = async (archiveId: string) => {
     try {
-      const response = await fetch(`/api/archive/download?file=${filename}&type=json`);
+      const response = await fetch(`/api/archive/download?id=${archiveId}&type=json`);
       if (response.ok) {
         const data = await response.json();
         setSelectedSession(data);
@@ -114,28 +125,28 @@ export default function DataViewer() {
                     </div>
                     <div className="flex items-center space-x-2">
                       <button
-                        onClick={() => viewSessionDetails(session.filename)}
+                        onClick={() => viewSessionDetails(session.id)}
                         className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-primary-700 bg-primary-100 hover:bg-primary-200 transition-colors"
                       >
                         <Eye className="h-3 w-3 mr-1" />
                         View
                       </button>
                       <button
-                        onClick={() => downloadFile(session.filename, 'json')}
+                        onClick={() => downloadFile(session.id, 'json')}
                         className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 transition-colors"
                       >
                         <Download className="h-3 w-3 mr-1" />
                         JSON
                       </button>
                       <button
-                        onClick={() => downloadFile(session.filename, 'csv')}
+                        onClick={() => downloadFile(session.id, 'csv')}
                         className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 transition-colors"
                       >
                         <Download className="h-3 w-3 mr-1" />
                         CSV
                       </button>
                       <button
-                        onClick={() => downloadFile(session.filename, 'report')}
+                        onClick={() => downloadFile(session.id, 'report')}
                         className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-purple-700 bg-purple-100 hover:bg-purple-200 transition-colors"
                       >
                         <Download className="h-3 w-3 mr-1" />
@@ -175,12 +186,12 @@ export default function DataViewer() {
               <div>
                 <h4 className="font-medium text-gray-900">Activity Summary</h4>
                 <p className="text-sm text-gray-600">Total Messages: {selectedSession.totalMessages}</p>
-                <p className="text-sm text-gray-600">Prompts Completed: {selectedSession.responses.length}</p>
+                <p className="text-sm text-gray-600">Prompts Completed: {selectedSession.responses?.length || 0}</p>
               </div>
               
               <div>
                 <h4 className="font-medium text-gray-900">SRL Component Engagement</h4>
-                {Object.entries(selectedSession.srlComponentStats).map(([component, count]: [string, any]) => (
+                {selectedSession.srlComponentStats && Object.entries(selectedSession.srlComponentStats).map(([component, count]: [string, any]) => (
                   <p key={component} className="text-sm text-gray-600">
                     {component}: {count} responses
                   </p>
@@ -189,12 +200,12 @@ export default function DataViewer() {
               
               <div>
                 <h4 className="font-medium text-gray-900">Responses</h4>
-                {selectedSession.responses.map((response: any, index: number) => (
+                {selectedSession.responses?.map((response: any, index: number) => (
                   <div key={index} className="mt-2 p-2 bg-gray-50 rounded">
                     <p className="text-xs text-gray-500">Week {response.week} - {response.component}</p>
                     <p className="text-sm text-gray-900">"{response.response}"</p>
                   </div>
-                ))}
+                )) || <p className="text-sm text-gray-500">No responses available</p>}
               </div>
             </div>
           </div>

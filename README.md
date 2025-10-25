@@ -1,6 +1,6 @@
 # SRL Learning Assistant Chatbot
 
-An AI-powered chatbot designed to facilitate students' self-regulated learning (SRL) based on the Success through Self-Regulated Learning (StSRL) framework developed at Penn State University.
+An AI-powered chatbot designed to facilitate students' self-regulated learning (SRL) based on the Success through Self-Regulated Learning (StSRL) framework developed at Penn State University. This chatbot is trained and informed by empirical research articles and previous implementations of the StSRL framework, ensuring evidence-based design and effectiveness.
 
 ## 🎯 Project Overview
 

@@ -1,25 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
 import { UserSession } from '@/types/srl';
 import { exportSessionData, exportToJSON, exportToCSV } from '@/utils/data-export';
-
-const DATA_DIR = path.join(process.cwd(), 'data', 'archives');
-
-// Ensure data directory exists
-async function ensureDataDir() {
-  try {
-    await fs.access(DATA_DIR);
-  } catch {
-    await fs.mkdir(DATA_DIR, { recursive: true });
-  }
-}
+import { archiveSession, getAllArchives, getArchive } from '@/lib/firestore';
 
 // POST: Archive session data
 export async function POST(request: NextRequest) {
   try {
-    await ensureDataDir();
-    
     const body = await request.json();
     const { session } = body;
 
@@ -30,33 +16,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate timestamp for filename
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const filename = `session_${session.userId}_${timestamp}`;
-    
     // Export session data
     const exportData = exportSessionData(session);
     
-    // Save as JSON
-    const jsonPath = path.join(DATA_DIR, `${filename}.json`);
-    await fs.writeFile(jsonPath, exportToJSON(exportData));
-    
-    // Save as CSV
-    const csvPath = path.join(DATA_DIR, `${filename}.csv`);
-    await fs.writeFile(csvPath, exportToCSV(exportData));
-    
-    // Save report
-    const reportPath = path.join(DATA_DIR, `${filename}_report.txt`);
-    const report = generateReport(exportData);
-    await fs.writeFile(reportPath, report);
+    // Archive to Firebase
+    const archiveId = await archiveSession(session, exportData);
 
     return NextResponse.json({
       success: true,
-      message: 'Session archived successfully',
-      files: {
-        json: `${filename}.json`,
-        csv: `${filename}.csv`,
-        report: `${filename}_report.txt`
+      message: 'Session archived successfully to Firebase',
+      archiveId,
+      exportData: {
+        userId: exportData.userId,
+        sessionId: exportData.sessionId,
+        totalMessages: exportData.totalMessages,
+        responses: exportData.responses.length,
+        srlComponentStats: exportData.srlComponentStats
       }
     });
 
@@ -72,28 +47,19 @@ export async function POST(request: NextRequest) {
 // GET: List archived sessions
 export async function GET() {
   try {
-    await ensureDataDir();
+    const archives = await getAllArchives();
     
-    const files = await fs.readdir(DATA_DIR);
-    const sessions = files
-      .filter(file => file.endsWith('.json'))
-      .map(file => {
-        const match = file.match(/session_(.+)_(.+)\.json/);
-        if (match) {
-          return {
-            filename: file,
-            userId: match[1],
-            timestamp: match[2].replace(/-/g, ':'),
-            date: new Date(match[2].replace(/-/g, ':')).toLocaleDateString()
-          };
-        }
-        return null;
-      })
-      .filter(Boolean)
-      .sort((a, b) => {
-        if (!a || !b) return 0;
-        return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
-      });
+    const sessions = archives.map(archive => ({
+      id: archive.id,
+      filename: archive.files.json,
+      userId: archive.userId,
+      timestamp: archive.archivedAt.toDate().toISOString(),
+      date: archive.archivedAt.toDate().toLocaleDateString(),
+      sessionId: archive.sessionId,
+      totalMessages: archive.exportData.totalMessages,
+      responses: archive.exportData.responses.length,
+      srlComponentStats: archive.exportData.srlComponentStats
+    }));
 
     return NextResponse.json({
       success: true,
@@ -109,7 +75,8 @@ export async function GET() {
   }
 }
 
-function generateReport(exportData: any): string {
+// Helper function to generate report text
+export function generateReport(exportData: any): string {
   return `
 SRL Learning Assistant - Session Report
 =====================================
