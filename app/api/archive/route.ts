@@ -76,7 +76,7 @@ export async function GET() {
 }
 
 // Helper function to generate report text
-export function generateReport(exportData: any): string {
+function generateReport(exportData: any): string {
   return `
 SRL Learning Assistant - Session Report
 =====================================

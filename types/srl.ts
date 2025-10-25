@@ -31,6 +31,7 @@ export interface UserSession {
   responses: Record<string, any>;
   createdAt: Date;
   lastActive: Date;
+  isArchived?: boolean;
 }
 
 export interface SRLFeedback {
