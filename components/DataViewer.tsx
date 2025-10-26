@@ -450,7 +450,7 @@ export default function DataViewer() {
             <BarChart3 className="h-4 w-4" />
             <span>Export All JSON</span>
           </button>
-          <div className="relative" data-dropdown-container onMouseEnter={() => setShowDropdown(true)} onMouseLeave={() => setShowDropdown(false)}>
+          <div className="relative" data-dropdown-container>
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -464,8 +464,6 @@ export default function DataViewer() {
             {showDropdown && (
               <div 
                 className="absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-lg border z-50"
-                onMouseEnter={() => setShowDropdown(true)}
-                onMouseLeave={() => setShowDropdown(false)}
                 data-dropdown-container
               >
                 <div className="p-2">
