@@ -228,36 +228,10 @@ export default function ChatInterface({ userId, firstName, studentId }: ChatInte
   };
 
   const handleFinishChat = async () => {
-    // Generate adaptive completion message
-    try {
-      const response = await fetch('/api/completion', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          conversationHistory: messages
-            .filter(msg => msg.sender === 'user' || msg.sender === 'bot')
-            .slice(-6)
-            .map(msg => ({
-              role: msg.sender === 'bot' ? 'bot' : 'user',
-              content: msg.content
-            }))
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setCompletionMessage(data.message);
-      } else {
-        throw new Error('Failed to generate completion message');
-      }
-    } catch (error) {
-      console.error('Error generating completion message:', error);
-      setCompletionMessage('');
-    }
-
-    // End the conversation and archive data
+    // Show completion UI immediately
+    setIsCompleted(true);
+    
+    // End the conversation and archive data immediately
     const endMessage: ChatMessage = {
       id: `end-${Date.now()}`,
       timestamp: new Date(),
@@ -265,7 +239,6 @@ export default function ChatInterface({ userId, firstName, studentId }: ChatInte
       content: "Perfect! Thank you for engaging with this learning prompt. Your responses have been saved for your learning journey. Feel free to come back anytime for more SRL support!"
     };
     setMessages(prev => [...prev, endMessage]);
-    setIsCompleted(true); // Mark session as completed
     
     // Archive the session data
     const sessionData = {
@@ -294,6 +267,34 @@ export default function ChatInterface({ userId, firstName, studentId }: ChatInte
     }
     
     setCurrentPrompt(null); // Clear the current prompt
+    
+    // Generate adaptive completion message in the background
+    setTimeout(async () => {
+      try {
+        const response = await fetch('/api/completion', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            conversationHistory: messages
+              .filter(msg => msg.sender === 'user' || msg.sender === 'bot')
+              .slice(-6)
+              .map(msg => ({
+                role: msg.sender === 'bot' ? 'bot' : 'user',
+                content: msg.content
+              }))
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setCompletionMessage(data.message);
+        }
+      } catch (error) {
+        console.error('Error generating completion message:', error);
+      }
+    }, 100);
   };
 
   const resetToWeekSelection = () => {
