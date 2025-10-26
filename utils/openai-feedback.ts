@@ -81,31 +81,38 @@ function createSystemPrompt(component: SRLComponent, week: number): string {
     management: "Management refers to students' ability to organize their time, resources, and learning environment effectively."
   };
 
-  return `You are a supportive SRL learning coach helping a student in Week ${week}.
+  return `You are an expert SRL (Self-Regulated Learning) learning coach facilitating deep reflection with a student in Week ${week}.
 
 Focus on the ${component} component of SRL: ${componentDescriptions[component]}
 
+YOUR ROLE:
+- Guide students to think DEEPLY about their learning processes
+- Help them reflect on metacognitive awareness, strategies, motivation, and self-regulation
+- Encourage self-discovery and self-awareness
+- Build their capacity for independent learning
+
 CRITICAL RULES:
-1. **ACKNOWLEDGE THEIR RESPONSE** - Reference what they said specifically
-2. **PROVIDE MODERATE FEEDBACK** - 3-4 sentences with helpful insights
-3. **GIVE 2-3 ACTIONABLE SUGGESTIONS** - Practical tips they can implement
-4. **ALWAYS END WITH THE SAME QUESTION** - "Would you like to discuss this topic more, or are you satisfied with this prompt? If you're satisfied, you can press the 'Finish Chatting' button below."
+1. **ENGAGE IN RICH DIALOGUE** - Reference specific details from their response
+2. **FOSTER METACOGNITIVE THINKING** - Ask questions that make them reflect on HOW they learn, not just WHAT they learn
+3. **CONNECT TO SRL CONCEPTS** - Help them understand planning, monitoring, evaluating, and adapting strategies
+4. **PROMPT DEEPER REFLECTION** - Ask open-ended questions that encourage self-exploration
 
 Your feedback should be:
-- SHORT and concise (2-3 sentences only)
-- Acknowledge what they said briefly  
-- Ask an OPEN-ENDED question to encourage deeper reflection
-- Be conversational and warm
+- Thoughtful and insightful (2-3 sentences)
+- Acknowledge their specific experience
+- Ask a thought-provoking question that deepens their self-awareness
+- Connect to self-regulated learning principles
+- Be warm, curious, and encouraging
 
-CRITICAL: End with a question that prompts them to share more or think deeper.
+CRITICAL: Ask a question that makes them reflect DEEPER on their learning process and self-regulation skills.
 
 Provide your response in the following JSON format:
 {
-  "feedback": "Short 2-3 sentence response that acknowledges their answer and asks an engaging follow-up question",
-  "followUpQuestion": "Would you like to discuss this topic more, or are you satisfied with this prompt?"
+  "feedback": "Thoughtful response that acknowledges their answer and asks a deep, reflective question about their learning process",
+  "followUpQuestion": "No follow-up needed"
 }
 
-Keep it SHORT and conversational.`;
+Be an expert learning coach, not just a chatbot.`;
 }
 
 function createUserPrompt(context: FeedbackContext): string {
@@ -118,12 +125,12 @@ Prompt Question: "${prompt.question}"
 SRL Component: ${context.component}
 Week: ${context.week}
 
-Provide a SHORT response (2-3 sentences) that:
-1. Briefly acknowledges what they said
-2. Asks an open-ended question to encourage deeper reflection
-3. Ends with: "Would you like to discuss this topic more, or are you satisfied with this prompt?"
+Provide a thoughtful response (2-3 sentences) that:
+1. Acknowledges their specific experience and insights
+2. Asks a deep, reflective question that encourages metacognitive thinking about their learning process
+3. Helps them reflect on HOW they learn, strategies they use, or their self-regulation
 
-Keep it SHORT and conversational - like a quick chat.`;
+Be an expert SRL coach - help them think deeply about their learning, not just surface-level responses.`;
 }
 
 function parseFeedbackResponse(response: string, context: FeedbackContext): {
@@ -169,19 +176,19 @@ function parseFeedbackResponse(response: string, context: FeedbackContext): {
 
 function generateFallbackFeedback(context: FeedbackContext): SRLFeedback {
   const basicFeedback = {
-    metacognition: "Thanks for sharing your thoughts on learning! It's great that you're reflecting on your learning process. Consider what specific strategies have been most effective for you and why they work well.",
-    strategy: "Great job thinking about your study methods! It's important to understand what works best for you. Try experimenting with one new strategy this week and see how it affects your learning.",
-    motivation: "Your motivation is key to success! It's wonderful that you're engaged with the material. Try connecting what you're learning to your personal interests and future goals.",
-    content: "Good work understanding the content! It's important to build connections between new and existing knowledge. Try to relate this material to what you already know or have experienced.",
-    management: "Time management is crucial for academic success! It's great that you're thinking about organization. Consider creating a structured study schedule that works with your natural rhythms."
+    metacognition: "Thanks for sharing your thoughts on learning! It's great that you're reflecting on your learning process. What specific metacognitive strategies have been most effective for you, and how do you plan, monitor, and evaluate your learning?",
+    strategy: "Great job thinking about your study methods! It's important to understand what works best for you. How do you choose which learning strategies to use, and how do you know if they're effective?",
+    motivation: "Your motivation is key to success! It's wonderful that you're engaged with the material. How do you maintain your motivation when facing challenging topics, and what strategies help you stay engaged?",
+    content: "Good work understanding the content! It's important to build connections between new and existing knowledge. How do you actively make connections between what you're learning now and what you already know?",
+    management: "Time management is crucial for academic success! It's great that you're thinking about organization. How do you prioritize tasks and manage your time effectively while maintaining balance?"
   };
 
-  const componentFeedback = basicFeedback[context.component] || "Thank you for your response! What specific strategies would you like to try this week?";
+  const componentFeedback = basicFeedback[context.component] || "Thank you for sharing your thoughts! This reflection on your learning process is valuable.";
   
   return {
     promptId: context.promptId,
     response: context.response,
-    feedback: `${componentFeedback} Would you like to discuss this topic more, or are you satisfied with this prompt?`,
+    feedback: componentFeedback,
     suggestions: [],
     nextSteps: []
   };
