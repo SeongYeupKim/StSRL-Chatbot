@@ -50,6 +50,7 @@ export default function DataViewer() {
   const [sortBy, setSortBy] = useState<'date' | 'userId' | 'responses'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [viewMode, setViewMode] = useState<'individual' | 'aggregated'>('individual');
+  const [showDropdown, setShowDropdown] = useState(false);
 
   useEffect(() => {
     fetchSessions();
@@ -328,54 +329,72 @@ export default function DataViewer() {
           URL.revokeObjectURL(url);
           document.body.removeChild(a);
         } else if (format === 'csv-response' || format === 'csv') {
-          // Response-level CSV: One row per prompt/response
-          const csvHeaders = [
-            'Session ID',
-            'User ID',
-            'Date',
-            'Week',
-            'Prompt ID',
-            'SRL Component',
-            'Question',
-            'Student Response',
-            'AI Feedback',
-            'Response Timestamp'
-          ];
-
-          const csvRows: any[] = [];
+          // Response-level CSV: Group by user + week, combine all responses in one row
+          
+          // Group sessions by userId and week
+          const sessionGroups = new Map<string, any>();
           
           allSessions.forEach((session: any) => {
             if (session.detailedResponses && session.detailedResponses.length > 0) {
-              // Create a row for each prompt/response
               session.detailedResponses.forEach((response: any) => {
-                csvRows.push([
-                  session.id,
-                  session.userId,
-                  session.date,
-                  response.week,
-                  response.promptId,
-                  response.component,
-                  response.question,
-                  response.response,
-                  response.feedback,
-                  response.timestamp
-                ]);
+                const key = `${session.userId}_${response.week}`;
+                if (!sessionGroups.has(key)) {
+                  sessionGroups.set(key, {
+                    userId: session.userId,
+                    week: response.week,
+                    date: session.date,
+                    responses: []
+                  });
+                }
+                sessionGroups.get(key)!.responses.push(response);
               });
-            } else {
-              // Fallback: create a summary row if no detailed responses
-              csvRows.push([
-                session.id,
-                session.userId,
-                session.date,
-                'N/A',
-                'N/A',
-                'N/A',
-                'N/A',
-                'N/A',
-                'N/A',
-                'N/A'
-              ]);
             }
+          });
+          
+          // Find max number of responses to create dynamic columns
+          let maxResponses = 0;
+          sessionGroups.forEach((group) => {
+            if (group.responses.length > maxResponses) {
+              maxResponses = group.responses.length;
+            }
+          });
+          
+          // Create dynamic headers
+          const csvHeaders = [
+            'User ID',
+            'Week',
+            'Date'
+          ];
+          
+          for (let i = 1; i <= maxResponses; i++) {
+            csvHeaders.push(
+              `Response ${i}`,
+              `AI Feedback ${i}`
+            );
+          }
+          
+          // Create rows
+          const csvRows: any[] = [];
+          sessionGroups.forEach((group) => {
+            const row: any[] = [
+              group.userId,
+              group.week,
+              group.date
+            ];
+            
+            // Add all responses and feedbacks
+            for (let i = 0; i < maxResponses; i++) {
+              if (i < group.responses.length) {
+                const response = group.responses[i];
+                row.push(response.response || '');
+                row.push(response.feedback || '');
+              } else {
+                row.push('');
+                row.push('');
+              }
+            }
+            
+            csvRows.push(row);
           });
 
           const csvContent = [
@@ -419,32 +438,37 @@ export default function DataViewer() {
             <BarChart3 className="h-4 w-4" />
             <span>Export All JSON</span>
           </button>
-          <div className="relative">
-            <div className="group inline-block">
-              <button
-                onClick={() => exportAllData('csv')}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
-              >
-                <BarChart3 className="h-4 w-4" />
-                <span>Export All CSV</span>
-              </button>
-              <div className="hidden group-hover:block absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-lg border z-50">
+          <div className="relative" onMouseEnter={() => setShowDropdown(true)} onMouseLeave={() => setShowDropdown(false)}>
+            <button
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+            >
+              <BarChart3 className="h-4 w-4" />
+              <span>Export All CSV</span>
+            </button>
+            {showDropdown && (
+              <div className="absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-lg border z-50">
                 <div className="p-2">
                   <button
-                    onClick={() => exportAllData('csv-student')}
+                    onClick={() => {
+                      exportAllData('csv-student');
+                      setShowDropdown(false);
+                    }}
                     className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
                   >
                     📊 Student-level (LMS style)
                   </button>
                   <button
-                    onClick={() => exportAllData('csv-response')}
+                    onClick={() => {
+                      exportAllData('csv-response');
+                      setShowDropdown(false);
+                    }}
                     className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
                   >
                     📝 Response-level (Detailed log)
                   </button>
                 </div>
               </div>
-            </div>
+            )}
           </div>
           <button
             onClick={fetchSessions}

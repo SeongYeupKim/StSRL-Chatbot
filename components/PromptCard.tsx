@@ -154,7 +154,15 @@ export default function PromptCard({ prompt, onResponse, onFinishChat, disabled 
           <textarea
             value={response}
             onChange={(e) => setResponse(e.target.value)}
-            placeholder="Type your response here..."
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (response.trim() && !disabled) {
+                  handleSubmit();
+                }
+              }
+            }}
+            placeholder="Type your response here... (Press Enter to submit, Shift+Enter for new line)"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 resize-none"
             rows={3}
             disabled={disabled}
@@ -229,7 +237,15 @@ export default function PromptCard({ prompt, onResponse, onFinishChat, disabled 
             <textarea
               value={additionalResponse}
               onChange={(e) => setAdditionalResponse(e.target.value)}
-              placeholder="Share any additional thoughts, explanations, or reflections..."
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  if (canSubmit() && !disabled) {
+                    handleSubmit();
+                  }
+                }
+              }}
+              placeholder="Share any additional thoughts... (Press Enter to submit, Shift+Enter for new line)"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 resize-none"
               rows={2}
               disabled={disabled}
