@@ -20,6 +20,7 @@ export default function ChatInterface({ userId, firstName, studentId }: ChatInte
   const [currentWeek, setCurrentWeek] = useState<number | null>(null);
   const [currentPrompt, setCurrentPrompt] = useState<SRLPrompt | null>(null);
   const [isWaitingForResponse, setIsWaitingForResponse] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
   const [showWeekSelector, setShowWeekSelector] = useState(true);
   const [sessionId] = useState<string>(`session_${Date.now()}`);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -40,7 +41,7 @@ export default function ChatInterface({ userId, firstName, studentId }: ChatInte
         id: 'welcome',
         timestamp: new Date(),
         sender: 'bot',
-        content: `Hello ${displayName}! I'm SPARK, your Self-Regulated Learning Assistant from Penn State. I'm here to help you develop better learning skills. Which week are you currently in?`
+        content: `Hello ${displayName}! I'm SPARK, your Self-Regulated Learning Assistant. I'm here to help you develop better learning skills. Which week are you currently in?`
       };
       setMessages([welcomeMessage]);
     }
@@ -104,8 +105,8 @@ export default function ChatInterface({ userId, firstName, studentId }: ChatInte
         const data = await apiResponse.json();
         const { feedback } = data;
         
-        // Combine feedback with the standard follow-up question
-        const combinedContent = `${feedback.feedback}\n\n**Suggestions:**\n${feedback.suggestions.map((s: string) => `• ${s}`).join('\n')}\n\n**Next Steps:**\n${feedback.nextSteps.map((s: string) => `• ${s}`).join('\n')}\n\n${feedback.followUpQuestion || 'Would you like to discuss this topic more, or are you satisfied with this prompt? If you\'re satisfied, you can press the \'Finish Chatting\' button below.'}`;
+        // Use the natural flowing feedback
+        const combinedContent = feedback.feedback;
         
         // Add single combined feedback message
         const feedbackMessage: ChatMessage = {
@@ -130,7 +131,7 @@ export default function ChatInterface({ userId, firstName, studentId }: ChatInte
         id: `feedback-${Date.now()}`,
         timestamp: new Date(),
         sender: 'bot',
-        content: "Thanks for your response! Consider trying one new learning strategy this week.\n\n**Suggestion:**\n• Reflect on what works best for you\n\n**Next Step:**\n• Try one new study method\n\nWould you like to discuss this topic more, or are you satisfied with this prompt? If you're satisfied, you can press the 'Finish Chatting' button below.",
+        content: "Thanks for your response! Consider trying one new learning strategy this week and reflecting on what works best for you. Keep up the great work! Would you like to discuss this topic more, or are you satisfied with this prompt?",
         promptId: currentPrompt.id
       };
       setMessages(prev => [...prev, fallbackMessage]);
@@ -230,6 +231,7 @@ export default function ChatInterface({ userId, firstName, studentId }: ChatInte
       content: "Perfect! Thank you for engaging with this learning prompt. Your responses have been saved for your learning journey. Feel free to come back anytime for more SRL support!"
     };
     setMessages(prev => [...prev, endMessage]);
+    setIsCompleted(true); // Mark session as completed
     
     // Archive the session data
     const sessionData = {
@@ -269,7 +271,7 @@ export default function ChatInterface({ userId, firstName, studentId }: ChatInte
       id: 'welcome',
       timestamp: new Date(),
       sender: 'bot',
-      content: `Hello ${displayName}! I'm SPARK, your Self-Regulated Learning Assistant from Penn State. I'm here to help you develop better learning skills. Which week are you currently in?`
+      content: `Hello ${displayName}! I'm SPARK, your Self-Regulated Learning Assistant. I'm here to help you develop better learning skills. Which week are you currently in?`
     }]);
   };
 
@@ -285,17 +287,29 @@ export default function ChatInterface({ userId, firstName, studentId }: ChatInte
                 <span className="text-5xl">✨</span>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-1">SPARK</h3>
-              <p className="text-sm text-gray-600">Penn State Learning Assistant</p>
+              <p className="text-sm text-gray-600">Learning Assistant</p>
             </div>
             
             {/* Tips Section */}
             <div className="bg-white rounded-lg p-4 shadow-sm border border-blue-200">
               <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
-                <span className="text-blue-600 mr-2">💡</span>
-                Learning Tip
+                <span className="text-blue-600 mr-2">{isCompleted ? '🎉' : '💡'}</span>
+                {isCompleted ? 'Great Job!' : 'Learning Tip'}
               </h4>
               <p className="text-sm text-gray-700 leading-relaxed">
-                {currentWeek ? (
+                {isCompleted ? (
+                  <>
+                    Excellent work completing your learning session! Here are some tips to keep improving:
+                    <br /><br />
+                    • Apply what you've reflected on this week
+                    <br />
+                    • Try implementing one new strategy you discussed
+                    <br />
+                    • Come back next week for more guided reflection
+                    <br />
+                    • Keep building your self-regulated learning skills!
+                  </>
+                ) : currentWeek ? (
                   <>
                     Welcome to Week {currentWeek}! Take your time reflecting on the questions. 
                     Your thoughtful responses will help you develop stronger self-regulated learning skills.
@@ -309,22 +323,7 @@ export default function ChatInterface({ userId, firstName, studentId }: ChatInte
               </p>
             </div>
             
-            {/* Progress Indicator */}
-            {currentWeek && (
-              <div className="mt-4 bg-white rounded-lg p-4 shadow-sm border border-blue-200">
-                <h4 className="font-semibold text-gray-900 mb-3 text-sm">Your Progress</h4>
-                <div className="space-y-2">
-                  {[1, 2, 3, 4].map((num) => (
-                    <div key={num} className="flex items-center space-x-2">
-                      <div className={`w-2 h-2 rounded-full ${num <= currentWeek ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                      <span className={`text-xs ${num <= currentWeek ? 'text-green-700 font-medium' : 'text-gray-400'}`}>
-                        {num <= currentWeek ? 'Completed' : 'Upcoming'}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+
           </div>
         </div>
         

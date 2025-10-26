@@ -50,8 +50,8 @@ export async function generateOpenAIFeedback(context: FeedbackContext): Promise<
       promptId: context.promptId,
       response: context.response,
       feedback: parsedFeedback.feedback,
-      suggestions: parsedFeedback.suggestions,
-      nextSteps: parsedFeedback.nextSteps
+      suggestions: parsedFeedback.suggestions || [],
+      nextSteps: parsedFeedback.nextSteps || []
     };
   } catch (error) {
     console.error('OpenAI API error:', error);
@@ -80,18 +80,16 @@ CRITICAL RULES:
 4. **ALWAYS END WITH THE SAME QUESTION** - "Would you like to discuss this topic more, or are you satisfied with this prompt? If you're satisfied, you can press the 'Finish Chatting' button below."
 
 Your feedback should be:
-- Moderate length (3-4 sentences)
+- ONE cohesive paragraph (4-5 sentences)
 - Encouraging and supportive
 - Specific to their response
-- Include 2-3 actionable suggestions
-- Always ask the same follow-up question with button guidance
+- Include actionable suggestions naturally in the flow
+- End with: "Would you like to discuss this topic more, or are you satisfied with this prompt?"
 
 Provide your response in the following JSON format:
 {
-  "feedback": "Moderate length response that acknowledges their answer and provides helpful insights",
-  "suggestions": ["Suggestion 1", "Suggestion 2"],
-  "nextSteps": ["Next step 1", "Next step 2"],
-  "followUpQuestion": "Would you like to discuss this topic more, or are you satisfied with this prompt? If you're satisfied, you can press the 'Finish Chatting' button below."
+  "feedback": "One flowing paragraph that acknowledges their answer and provides helpful insights with natural suggestions embedded",
+  "followUpQuestion": "Would you like to discuss this topic more, or are you satisfied with this prompt?"
 }
 
 Keep it conversational and helpful, but not overwhelming.`;
@@ -107,12 +105,12 @@ Prompt Question: "${prompt.question}"
 SRL Component: ${context.component}
 Week: ${context.week}
 
-Provide a brief, encouraging response that:
-1. Acknowledges what they said
-2. Gives one simple suggestion
-3. Always ends with: "Would you like to discuss this topic more, or are you satisfied with this prompt?"
+Provide ONE flowing paragraph that:
+1. Acknowledges what they said specifically
+2. Provides helpful insights with suggestions naturally embedded
+3. Ends with: "Would you like to discuss this topic more, or are you satisfied with this prompt?"
 
-Keep it short and simple.`;
+Write it as a conversational, natural response - not as separate sections.`;
 }
 
 function parseFeedbackResponse(response: string, context: FeedbackContext): {
@@ -165,19 +163,14 @@ function generateFallbackFeedback(context: FeedbackContext): SRLFeedback {
     management: "Time management is crucial for academic success! It's great that you're thinking about organization. Consider creating a structured study schedule that works with your natural rhythms."
   };
 
+  const componentFeedback = basicFeedback[context.component] || "Thank you for your response! I appreciate you taking the time to reflect on your learning. Keep up the great work and continue thinking about how you can improve your learning strategies.";
+  
   return {
     promptId: context.promptId,
     response: context.response,
-    feedback: basicFeedback[context.component] || "Thank you for your response! I appreciate you taking the time to reflect on your learning.",
-    suggestions: [
-      "Try one new learning strategy this week",
-      "Reflect on what works best for you"
-    ],
-    nextSteps: [
-      "Monitor your progress with the new approach",
-      "Adjust your strategies based on what you learn"
-    ],
-    followUpQuestion: "Would you like to discuss this topic more, or are you satisfied with this prompt? If you're satisfied, you can press the 'Finish Chatting' button below."
+    feedback: `${componentFeedback} Would you like to discuss this topic more, or are you satisfied with this prompt?`,
+    suggestions: [],
+    nextSteps: []
   };
 }
 

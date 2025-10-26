@@ -83,7 +83,7 @@ export default function AuthForm({ onAuthSuccess }: AuthFormProps) {
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">SPARK</h1>
           <p className="text-lg text-gray-600 font-medium">Self-Regulated Learning Assistant</p>
-          <p className="text-sm text-gray-500 mt-1">Pennsylvania State University</p>
+
         </div>
 
         <div className="flex rounded-lg border mb-6">
