@@ -317,8 +317,20 @@ export default function ChatInterface({ userId, firstName, studentId }: ChatInte
           <div className="p-6">
             {/* SPARK Character */}
             <div className="text-center mb-6">
-              <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full shadow-xl mb-4">
-                <span className="text-5xl">✨</span>
+              <div className="inline-flex items-center justify-center mb-4">
+                <img 
+                  src={isCompleted ? "/spark_end.png" : "/spark_basic.png"} 
+                  alt="SPARK Character" 
+                  className="w-48 h-auto"
+                  onError={(e) => {
+                    // Fallback to emoji if image not found
+                    e.currentTarget.style.display = 'none';
+                    const fallback = document.createElement('div');
+                    fallback.className = 'inline-flex items-center justify-center w-24 h-24 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full shadow-xl';
+                    fallback.innerHTML = '<span class="text-5xl">✨</span>';
+                    e.currentTarget.parentNode?.appendChild(fallback);
+                  }}
+                />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-1">SPARK</h3>
               <p className="text-sm text-gray-600">Learning Assistant</p>
@@ -351,6 +363,8 @@ export default function ChatInterface({ userId, firstName, studentId }: ChatInte
                   <>
                     Welcome to Week {currentWeek}! Take your time reflecting on the questions. 
                     Your thoughtful responses will help you develop stronger self-regulated learning skills.
+                    <br /><br />
+                    <strong>You can chat as much as you'd like, and press the "Finish Chatting" button whenever you're ready to end the session.</strong>
                   </>
                 ) : (
                   <>
