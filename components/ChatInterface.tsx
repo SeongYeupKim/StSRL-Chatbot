@@ -21,6 +21,7 @@ export default function ChatInterface({ userId, firstName, studentId }: ChatInte
   const [currentPrompt, setCurrentPrompt] = useState<SRLPrompt | null>(null);
   const [isWaitingForResponse, setIsWaitingForResponse] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [completionMessage, setCompletionMessage] = useState<string>('');
   const [showWeekSelector, setShowWeekSelector] = useState(true);
   const [sessionId] = useState<string>(`session_${Date.now()}`);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -97,7 +98,11 @@ export default function ChatInterface({ userId, firstName, studentId }: ChatInte
           response: response,
           component: currentPrompt.component,
           week: currentPrompt.week,
-          previousResponse: messages[messages.length - 1]?.response
+          previousResponse: messages[messages.length - 1]?.response,
+          conversationHistory: messages.slice(-4).map(msg => ({
+            role: msg.sender === 'bot' ? 'bot' : 'user',
+            content: msg.content
+          }))
         }),
       });
 
@@ -223,6 +228,35 @@ export default function ChatInterface({ userId, firstName, studentId }: ChatInte
   };
 
   const handleFinishChat = async () => {
+    // Generate adaptive completion message
+    try {
+      const response = await fetch('/api/completion', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          conversationHistory: messages
+            .filter(msg => msg.sender === 'user' || msg.sender === 'bot')
+            .slice(-6)
+            .map(msg => ({
+              role: msg.sender === 'bot' ? 'bot' : 'user',
+              content: msg.content
+            }))
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setCompletionMessage(data.message);
+      } else {
+        throw new Error('Failed to generate completion message');
+      }
+    } catch (error) {
+      console.error('Error generating completion message:', error);
+      setCompletionMessage('');
+    }
+
     // End the conversation and archive data
     const endMessage: ChatMessage = {
       id: `end-${Date.now()}`,
@@ -298,17 +332,21 @@ export default function ChatInterface({ userId, firstName, studentId }: ChatInte
               </h4>
               <p className="text-sm text-gray-700 leading-relaxed">
                 {isCompleted ? (
-                  <>
-                    Excellent work completing your learning session! Here are some tips to keep improving:
-                    <br /><br />
-                    • Apply what you've reflected on this week
-                    <br />
-                    • Try implementing one new strategy you discussed
-                    <br />
-                    • Come back next week for more guided reflection
-                    <br />
-                    • Keep building your self-regulated learning skills!
-                  </>
+                  completionMessage ? (
+                    <div dangerouslySetInnerHTML={{ __html: completionMessage.replace(/\n/g, '<br />') }} />
+                  ) : (
+                    <>
+                      Excellent work completing your learning session! Here are some tips to keep improving:
+                      <br /><br />
+                      • Apply what you've reflected on this week
+                      <br />
+                      • Try implementing one new strategy you discussed
+                      <br />
+                      • Come back next week for more guided reflection
+                      <br />
+                      • Keep building your self-regulated learning skills!
+                    </>
+                  )
                 ) : currentWeek ? (
                   <>
                     Welcome to Week {currentWeek}! Take your time reflecting on the questions. 

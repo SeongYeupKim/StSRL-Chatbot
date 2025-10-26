@@ -5,7 +5,7 @@ import { SRLComponent } from '@/types/srl';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { promptId, response, component, week, previousResponse } = body;
+    const { promptId, response, component, week, previousResponse, conversationHistory } = body;
 
     // Validate required fields
     if (!promptId || !response || !component || !week) {
@@ -29,7 +29,8 @@ export async function POST(request: NextRequest) {
       promptId,
       response,
       component,
-      week
+      week,
+      conversationHistory
     });
 
     return NextResponse.json({

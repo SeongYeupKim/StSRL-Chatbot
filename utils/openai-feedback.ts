@@ -38,7 +38,7 @@ export async function generateOpenAIFeedback(context: FeedbackContext): Promise<
         }
       ],
       temperature: 0.7,
-      max_tokens: 500
+      max_tokens: 250
     });
 
     const feedbackText = completion.choices[0]?.message?.content || '';
@@ -80,19 +80,20 @@ CRITICAL RULES:
 4. **ALWAYS END WITH THE SAME QUESTION** - "Would you like to discuss this topic more, or are you satisfied with this prompt? If you're satisfied, you can press the 'Finish Chatting' button below."
 
 Your feedback should be:
-- ONE cohesive paragraph (4-5 sentences)
-- Encouraging and supportive
-- Specific to their response
-- Include actionable suggestions naturally in the flow
-- End with: "Would you like to discuss this topic more, or are you satisfied with this prompt?"
+- SHORT and concise (2-3 sentences only)
+- Acknowledge what they said briefly  
+- Ask an OPEN-ENDED question to encourage deeper reflection
+- Be conversational and warm
+
+CRITICAL: End with a question that prompts them to share more or think deeper.
 
 Provide your response in the following JSON format:
 {
-  "feedback": "One flowing paragraph that acknowledges their answer and provides helpful insights with natural suggestions embedded",
+  "feedback": "Short 2-3 sentence response that acknowledges their answer and asks an engaging follow-up question",
   "followUpQuestion": "Would you like to discuss this topic more, or are you satisfied with this prompt?"
 }
 
-Keep it conversational and helpful, but not overwhelming.`;
+Keep it SHORT and conversational.`;
 }
 
 function createUserPrompt(context: FeedbackContext): string {
@@ -105,12 +106,12 @@ Prompt Question: "${prompt.question}"
 SRL Component: ${context.component}
 Week: ${context.week}
 
-Provide ONE flowing paragraph that:
-1. Acknowledges what they said specifically
-2. Provides helpful insights with suggestions naturally embedded
+Provide a SHORT response (2-3 sentences) that:
+1. Briefly acknowledges what they said
+2. Asks an open-ended question to encourage deeper reflection
 3. Ends with: "Would you like to discuss this topic more, or are you satisfied with this prompt?"
 
-Write it as a conversational, natural response - not as separate sections.`;
+Keep it SHORT and conversational - like a quick chat.`;
 }
 
 function parseFeedbackResponse(response: string, context: FeedbackContext): {
@@ -163,7 +164,7 @@ function generateFallbackFeedback(context: FeedbackContext): SRLFeedback {
     management: "Time management is crucial for academic success! It's great that you're thinking about organization. Consider creating a structured study schedule that works with your natural rhythms."
   };
 
-  const componentFeedback = basicFeedback[context.component] || "Thank you for your response! I appreciate you taking the time to reflect on your learning. Keep up the great work and continue thinking about how you can improve your learning strategies.";
+  const componentFeedback = basicFeedback[context.component] || "Thank you for your response! What specific strategies would you like to try this week?";
   
   return {
     promptId: context.promptId,
@@ -228,4 +229,48 @@ function generateFallbackFollowUp(component: SRLComponent, week: number): string
   };
 
   return fallbackQuestions[component] || "I'd love to hear more about your learning experience. What would you like to work on or discuss?";
+}
+
+export async function generateCompletionMessage(conversationHistory: Array<{ role: 'user' | 'bot'; content: string }>): Promise<string> {
+  const systemPrompt = `You are a supportive learning coach. Generate a brief, encouraging completion message based on the student's conversation.
+
+The message should:
+- Be 3-4 bullet points
+- Reference specific things they discussed
+- Give personalized next steps
+- Be encouraging and actionable
+- Be conversational and warm
+
+Keep it SHORT and focused.`;
+
+  const conversationSummary = conversationHistory
+    .filter(msg => msg.role === 'user')
+    .slice(-3) // Take last 3 user responses
+    .map(msg => msg.content)
+    .join('\n\n');
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: `Based on this conversation:\n\n${conversationSummary}\n\nGenerate a brief completion message with 3-4 personalized tips.` }
+      ],
+      temperature: 0.7,
+      max_tokens: 200
+    });
+
+    return completion.choices[0]?.message?.content || generateFallbackCompletionMessage();
+  } catch (error) {
+    console.error('OpenAI API error for completion message:', error);
+    return generateFallbackCompletionMessage();
+  }
+}
+
+function generateFallbackCompletionMessage(): string {
+  return `Great work completing your session! Here are some tips to keep improving:
+• Apply what you've reflected on this week
+• Try implementing one new strategy you discussed  
+• Come back next week for more guided reflection
+• Keep building your self-regulated learning skills!`;
 }
