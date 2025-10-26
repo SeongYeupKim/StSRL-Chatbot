@@ -47,10 +47,10 @@ export async function generateOpenAIFeedback(context: FeedbackContext): Promise<
     });
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o-mini",
       messages: messages,
       temperature: 0.7,
-      max_tokens: 250
+      max_tokens: 200
     });
 
     const feedbackText = completion.choices[0]?.message?.content || '';
@@ -214,14 +214,14 @@ Keep the question conversational and engaging (1-2 sentences). Start with a tran
     : `Generate a follow-up question for a student in week ${week} focusing on ${component}.`;
 
   try {
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4",
+          const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt }
       ],
       temperature: 0.8,
-      max_tokens: 120
+      max_tokens: 100
     });
 
     return completion.choices[0]?.message?.content || generateFallbackFollowUp(component, week);
@@ -263,13 +263,13 @@ Keep it SHORT and focused.`;
 
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o-mini",
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: `Based on this conversation:\n\n${conversationSummary}\n\nGenerate a brief completion message with 3-4 personalized tips.` }
       ],
       temperature: 0.7,
-      max_tokens: 200
+      max_tokens: 150
     });
 
     return completion.choices[0]?.message?.content || generateFallbackCompletionMessage();
