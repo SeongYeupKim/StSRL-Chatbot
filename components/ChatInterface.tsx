@@ -99,7 +99,7 @@ export default function ChatInterface({ userId, firstName, studentId }: ChatInte
           component: currentPrompt.component,
           week: currentPrompt.week,
           previousResponse: messages[messages.length - 1]?.response,
-          conversationHistory: messages.slice(-4).map(msg => ({
+          conversationHistory: messages.slice(-2).map(msg => ({
             role: msg.sender === 'bot' ? 'bot' : 'user',
             content: msg.content
           }))
