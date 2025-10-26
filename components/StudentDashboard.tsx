@@ -25,8 +25,13 @@ export default function StudentDashboard({ userId }: StudentDashboardProps) {
 
   useEffect(() => {
     loadUserData();
-    loadSessions();
   }, [userId]);
+
+  useEffect(() => {
+    if (userData?.studentId) {
+      loadSessions();
+    }
+  }, [userData]);
 
   const loadUserData = async () => {
     try {
@@ -41,34 +46,40 @@ export default function StudentDashboard({ userId }: StudentDashboardProps) {
 
   const loadSessions = async () => {
     try {
-      const q = query(collection(db, 'sessions'), where('userId', '==', userId));
-      const querySnapshot = await getDocs(q);
-      const sessionList: any[] = [];
-      const weeksSet = new Set<number>();
-
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        sessionList.push({ id: doc.id, ...data });
+      // Get all sessions from archives collection
+      const response = await fetch('/api/archive');
+      if (response.ok) {
+        const data = await response.json();
+        const allSessions = data.sessions || [];
         
-        if (data.weeklyProgress) {
-          data.weeklyProgress.forEach((wp: any) => {
-            weeksSet.add(wp.week);
-          });
-        }
-      });
+        // Filter sessions for this user (using studentId from userData)
+        const userSessions = allSessions.filter((session: any) => 
+          session.userId === userData?.studentId || session.userId === userData?.userId
+        );
+        
+        const weeksSet = new Set<number>();
 
-      setSessions(sessionList);
-      
-      const totalSessions = sessionList.length;
-      const totalResponses = sessionList.reduce((sum, s) => sum + (s.responses || 0), 0);
-      const totalMessages = sessionList.reduce((sum, s) => sum + (s.totalMessages || 0), 0);
-      
-      setStats({
-        totalSessions,
-        totalResponses,
-        totalMessages,
-        weeksCompleted: weeksSet
-      });
+        userSessions.forEach((session: any) => {
+          if (session.weeklyProgress) {
+            session.weeklyProgress.forEach((wp: any) => {
+              weeksSet.add(wp.week);
+            });
+          }
+        });
+
+        setSessions(userSessions);
+        
+        const totalSessions = userSessions.length;
+        const totalResponses = userSessions.reduce((sum: number, s: any) => sum + (s.responses || 0), 0);
+        const totalMessages = userSessions.reduce((sum: number, s: any) => sum + (s.totalMessages || 0), 0);
+        
+        setStats({
+          totalSessions,
+          totalResponses,
+          totalMessages,
+          weeksCompleted: weeksSet
+        });
+      }
     } catch (error) {
       console.error('Error loading sessions:', error);
     }
@@ -89,7 +100,7 @@ export default function StudentDashboard({ userId }: StudentDashboardProps) {
           >
             ← Back to Dashboard
           </button>
-          <ChatInterface userId={userId} firstName={userData?.firstName || ''} />
+          <ChatInterface userId={userId} firstName={userData?.firstName || ''} studentId={userData?.studentId || ''} />
         </div>
       </div>
     );

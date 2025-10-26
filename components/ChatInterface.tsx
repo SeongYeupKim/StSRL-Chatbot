@@ -12,9 +12,10 @@ import WeekSelector from './WeekSelector';
 interface ChatInterfaceProps {
   userId: string;
   firstName?: string;
+  studentId?: string;
 }
 
-export default function ChatInterface({ userId, firstName }: ChatInterfaceProps) {
+export default function ChatInterface({ userId, firstName, studentId }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [currentWeek, setCurrentWeek] = useState<number | null>(null);
   const [currentPrompt, setCurrentPrompt] = useState<SRLPrompt | null>(null);
@@ -165,7 +166,7 @@ export default function ChatInterface({ userId, firstName }: ChatInterfaceProps)
         // Archive the session data
         const sessionData = {
           id: sessionId,
-          userId: userId,
+          userId: studentId || userId, // Use studentId if available, otherwise fallback to userId
           currentWeek: currentWeek || 1,
           chatHistory: messages.map(msg => ({
             ...msg,
@@ -233,7 +234,7 @@ export default function ChatInterface({ userId, firstName }: ChatInterfaceProps)
     // Archive the session data
     const sessionData = {
       id: sessionId,
-      userId: userId,
+      userId: studentId || userId, // Use studentId if available, otherwise fallback to userId
       currentWeek: currentWeek || 1,
       chatHistory: messages.map(msg => ({
         ...msg,
