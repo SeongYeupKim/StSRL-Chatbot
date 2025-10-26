@@ -40,7 +40,7 @@ export default function ChatInterface({ userId, firstName, studentId }: ChatInte
         id: 'welcome',
         timestamp: new Date(),
         sender: 'bot',
-        content: `Hello ${displayName}! I'm your SRL Learning Assistant. I'm here to help you develop better self-regulated learning skills. Which week are you currently in?`
+        content: `Hello ${displayName}! I'm SPARK, your Self-Regulated Learning Assistant from Penn State. I'm here to help you develop better learning skills. Which week are you currently in?`
       };
       setMessages([welcomeMessage]);
     }
@@ -269,75 +269,130 @@ export default function ChatInterface({ userId, firstName, studentId }: ChatInte
       id: 'welcome',
       timestamp: new Date(),
       sender: 'bot',
-      content: `Hello ${displayName}! I'm your SRL Learning Assistant. I'm here to help you develop better self-regulated learning skills. Which week are you currently in?`
+      content: `Hello ${displayName}! I'm SPARK, your Self-Regulated Learning Assistant from Penn State. I'm here to help you develop better learning skills. Which week are you currently in?`
     }]);
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4">
-      <div className="bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200">
-        {/* Chat Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Bot className="h-6 w-6" />
-              <div>
-                <h2 className="text-lg font-semibold">SRL Learning Assistant</h2>
-                <p className="text-blue-100 text-sm">
-                  {currentWeek ? `Week ${currentWeek}` : 'Ready to help you learn'}
-                </p>
+    <div className="w-full max-w-7xl mx-auto px-4">
+      <div className="grid grid-cols-12 gap-4">
+        {/* Left Panel - SPARK Character & Tips */}
+        <div className="col-span-12 lg:col-span-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+          <div className="p-6">
+            {/* SPARK Character */}
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full shadow-xl mb-4">
+                <span className="text-5xl">✨</span>
               </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-1">SPARK</h3>
+              <p className="text-sm text-gray-600">Penn State Learning Assistant</p>
             </div>
-            <button
-              onClick={resetToWeekSelection}
-              className="text-blue-100 hover:text-white transition-colors"
-            >
-              <Calendar className="h-5 w-5" />
-            </button>
+            
+            {/* Tips Section */}
+            <div className="bg-white rounded-lg p-4 shadow-sm border border-blue-200">
+              <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                <span className="text-blue-600 mr-2">💡</span>
+                Learning Tip
+              </h4>
+              <p className="text-sm text-gray-700 leading-relaxed">
+                {currentWeek ? (
+                  <>
+                    Welcome to Week {currentWeek}! Take your time reflecting on the questions. 
+                    Your thoughtful responses will help you develop stronger self-regulated learning skills.
+                  </>
+                ) : (
+                  <>
+                    Select your current week to get personalized learning prompts. 
+                    These prompts are designed to help you reflect on your learning strategies and improve your study habits.
+                  </>
+                )}
+              </p>
+            </div>
+            
+            {/* Progress Indicator */}
+            {currentWeek && (
+              <div className="mt-4 bg-white rounded-lg p-4 shadow-sm border border-blue-200">
+                <h4 className="font-semibold text-gray-900 mb-3 text-sm">Your Progress</h4>
+                <div className="space-y-2">
+                  {[1, 2, 3, 4].map((num) => (
+                    <div key={num} className="flex items-center space-x-2">
+                      <div className={`w-2 h-2 rounded-full ${num <= currentWeek ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                      <span className={`text-xs ${num <= currentWeek ? 'text-green-700 font-medium' : 'text-gray-400'}`}>
+                        {num <= currentWeek ? 'Completed' : 'Upcoming'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
+        
+        {/* Right Panel - Main Chat */}
+        <div className="col-span-12 lg:col-span-8 bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200">
+          {/* Chat Header */}
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <Bot className="h-6 w-6" />
+                <div>
+                  <h2 className="text-lg font-semibold">Chat with SPARK</h2>
+                  <p className="text-blue-100 text-sm">
+                    {currentWeek ? `Week ${currentWeek}` : 'Ready to help you learn'}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={resetToWeekSelection}
+                className="text-blue-100 hover:text-white transition-colors"
+              >
+                <Calendar className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
 
-        {/* Chat Messages */}
-        <div className="h-[500px] overflow-y-auto p-6 space-y-4 bg-gradient-to-b from-gray-50 to-white">
-          {messages.map((message) => (
-            <ChatBubble key={message.id} message={message} />
-          ))}
-          
-          {isWaitingForResponse && (
-            <div className="flex items-center space-x-2 text-gray-500">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-500"></div>
-              <span className="text-sm">Generating feedback...</span>
+          {/* Chat Messages */}
+          <div className="h-[500px] overflow-y-auto p-6 space-y-4 bg-gradient-to-b from-gray-50 to-white">
+            {messages.map((message) => (
+              <ChatBubble key={message.id} message={message} />
+            ))}
+            
+            {isWaitingForResponse && (
+              <div className="flex items-center space-x-2 text-gray-500">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-500"></div>
+                <span className="text-sm">SPARK is thinking...</span>
+              </div>
+            )}
+            
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Week Selector */}
+          {showWeekSelector && (
+            <div className="p-6 border-t-2 border-gray-200 bg-gradient-to-b from-white to-gray-50">
+              <WeekSelector onWeekSelect={handleWeekSelection} />
             </div>
           )}
-          
-          <div ref={messagesEndRef} />
+
+          {/* Current Prompt */}
+          {currentPrompt && !showWeekSelector && (
+            <div className="p-6 border-t-2 border-gray-200 bg-gradient-to-b from-white to-blue-50">
+              <PromptCard 
+                prompt={currentPrompt} 
+                onResponse={handlePromptResponse}
+                onFinishChat={handleFinishChat}
+                disabled={isWaitingForResponse}
+              />
+            </div>
+          )}
+
+          {/* Message Input */}
+          {!showWeekSelector && !currentPrompt && (
+            <div className="p-6 border-t-2 border-gray-200 bg-gradient-to-b from-white to-gray-50">
+              <MessageInput onSendMessage={handleSendMessage} />
+            </div>
+          )}
         </div>
-
-        {/* Week Selector */}
-        {showWeekSelector && (
-          <div className="p-6 border-t-2 border-gray-200 bg-gradient-to-b from-white to-gray-50">
-            <WeekSelector onWeekSelect={handleWeekSelection} />
-          </div>
-        )}
-
-        {/* Current Prompt */}
-        {currentPrompt && !showWeekSelector && (
-          <div className="p-6 border-t-2 border-gray-200 bg-gradient-to-b from-white to-blue-50">
-            <PromptCard 
-              prompt={currentPrompt} 
-              onResponse={handlePromptResponse}
-              onFinishChat={handleFinishChat}
-              disabled={isWaitingForResponse}
-            />
-          </div>
-        )}
-
-        {/* Message Input */}
-        {!showWeekSelector && !currentPrompt && (
-          <div className="p-6 border-t-2 border-gray-200 bg-gradient-to-b from-white to-gray-50">
-            <MessageInput onSendMessage={handleSendMessage} />
-          </div>
-        )}
       </div>
     </div>
   );

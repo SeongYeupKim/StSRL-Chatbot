@@ -76,8 +76,14 @@ export default function AuthForm({ onAuthSuccess }: AuthFormProps) {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">SRL Learning Assistant</h1>
-          <p className="text-gray-600">Self-Regulated Learning Platform</p>
+          <div className="mb-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl mb-3 shadow-lg">
+              <span className="text-3xl font-bold text-white">✨</span>
+            </div>
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">SPARK</h1>
+          <p className="text-lg text-gray-600 font-medium">Self-Regulated Learning Assistant</p>
+          <p className="text-sm text-gray-500 mt-1">Pennsylvania State University</p>
         </div>
 
         <div className="flex rounded-lg border mb-6">
