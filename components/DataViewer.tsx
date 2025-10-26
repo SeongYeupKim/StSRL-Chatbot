@@ -60,6 +60,18 @@ export default function DataViewer() {
     applyFiltersAndSort();
   }, [sessions, filterUserId, filterDate, sortBy, sortOrder, viewMode]);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (showDropdown && !target.closest('[data-dropdown-container]')) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showDropdown]);
+
   const fetchSessions = async () => {
     try {
       const response = await fetch('/api/archive');
@@ -438,18 +450,28 @@ export default function DataViewer() {
             <BarChart3 className="h-4 w-4" />
             <span>Export All JSON</span>
           </button>
-          <div className="relative" onMouseEnter={() => setShowDropdown(true)} onMouseLeave={() => setShowDropdown(false)}>
+          <div className="relative" data-dropdown-container onMouseEnter={() => setShowDropdown(true)} onMouseLeave={() => setShowDropdown(false)}>
             <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDropdown(!showDropdown);
+              }}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
             >
               <BarChart3 className="h-4 w-4" />
               <span>Export All CSV</span>
             </button>
             {showDropdown && (
-              <div className="absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-lg border z-50">
+              <div 
+                className="absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-lg border z-50"
+                onMouseEnter={() => setShowDropdown(true)}
+                onMouseLeave={() => setShowDropdown(false)}
+                data-dropdown-container
+              >
                 <div className="p-2">
                   <button
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       exportAllData('csv-student');
                       setShowDropdown(false);
                     }}
@@ -458,7 +480,8 @@ export default function DataViewer() {
                     📊 Student-level (LMS style)
                   </button>
                   <button
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       exportAllData('csv-response');
                       setShowDropdown(false);
                     }}
