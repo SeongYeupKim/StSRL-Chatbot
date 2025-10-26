@@ -92,13 +92,14 @@ export default function StudentDashboard({ userId }: StudentDashboardProps) {
 
   if (activeView === 'chat') {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-6xl mx-auto p-4">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-6">
+        <div className="w-full max-w-6xl mx-auto px-2">
           <button
             onClick={() => setActiveView('dashboard')}
-            className="mb-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+            className="mb-4 px-4 py-2 bg-white text-gray-700 rounded-lg hover:bg-gray-100 transition-all shadow-md hover:shadow-lg flex items-center space-x-2"
           >
-            ← Back to Dashboard
+            <span>←</span>
+            <span>Back to Dashboard</span>
           </button>
           <ChatInterface userId={userId} firstName={userData?.firstName || ''} studentId={userData?.studentId || ''} />
         </div>
@@ -107,17 +108,17 @@ export default function StudentDashboard({ userId }: StudentDashboardProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      <div className="bg-white shadow-md border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">My Learning Dashboard</h1>
-            <p className="text-sm text-gray-600">{userData?.studentId || userData?.email}</p>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">My Learning Dashboard</h1>
+            <p className="text-sm text-gray-600 mt-1">{userData?.studentId || userData?.email}</p>
           </div>
           <button
             onClick={handleLogout}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-2"
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all shadow-md hover:shadow-lg flex items-center space-x-2"
           >
             <LogOut className="h-4 w-4" />
             <span>Logout</span>
@@ -127,8 +128,8 @@ export default function StudentDashboard({ userId }: StudentDashboardProps) {
 
       <div className="max-w-7xl mx-auto p-6">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-lg shadow p-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Total Sessions</p>
@@ -140,7 +141,7 @@ export default function StudentDashboard({ userId }: StudentDashboardProps) {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Total Responses</p>
@@ -152,7 +153,7 @@ export default function StudentDashboard({ userId }: StudentDashboardProps) {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Weeks Completed</p>
@@ -164,7 +165,7 @@ export default function StudentDashboard({ userId }: StudentDashboardProps) {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Avg. Responses</p>
@@ -180,14 +181,14 @@ export default function StudentDashboard({ userId }: StudentDashboardProps) {
         </div>
 
         {/* CTA Button */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Start a New Session</h2>
-          <p className="text-gray-600 mb-4">
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl shadow-xl p-8 mb-6 text-white">
+          <h2 className="text-2xl font-bold mb-3">Start a New Session</h2>
+          <p className="text-blue-100 mb-6">
             Continue your learning journey by starting a new SRL chat session.
           </p>
           <button
             onClick={() => setActiveView('chat')}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+            className="px-6 py-3 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-all shadow-lg hover:shadow-xl flex items-center space-x-2 font-semibold"
           >
             <MessageSquare className="h-5 w-5" />
             <span>Start Chat Session</span>
@@ -195,8 +196,8 @@ export default function StudentDashboard({ userId }: StudentDashboardProps) {
         </div>
 
         {/* Recent Sessions */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="p-6 border-b">
+        <div className="bg-white rounded-xl shadow-lg border border-gray-100">
+          <div className="p-6 border-b border-gray-200">
             <h2 className="text-xl font-bold text-gray-900">Recent Sessions</h2>
           </div>
           <div className="p-6">
@@ -207,7 +208,7 @@ export default function StudentDashboard({ userId }: StudentDashboardProps) {
             ) : (
               <div className="space-y-4">
                 {sessions.slice(0, 10).map((session) => (
-                  <div key={session.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                  <div key={session.id} className="border border-gray-200 rounded-lg p-4 hover:bg-blue-50 hover:border-blue-300 transition-all">
                     <div className="flex justify-between items-start">
                       <div>
                         <p className="font-medium text-gray-900">Session on {new Date(session.timestamp).toLocaleDateString()}</p>

@@ -274,23 +274,23 @@ export default function ChatInterface({ userId, firstName, studentId }: ChatInte
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+    <div className="w-full max-w-6xl mx-auto px-4">
+      <div className="bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200">
         {/* Chat Header */}
-        <div className="bg-primary-600 text-white px-6 py-4">
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <Bot className="h-6 w-6" />
               <div>
                 <h2 className="text-lg font-semibold">SRL Learning Assistant</h2>
-                <p className="text-primary-100 text-sm">
+                <p className="text-blue-100 text-sm">
                   {currentWeek ? `Week ${currentWeek}` : 'Ready to help you learn'}
                 </p>
               </div>
             </div>
             <button
               onClick={resetToWeekSelection}
-              className="text-primary-100 hover:text-white transition-colors"
+              className="text-blue-100 hover:text-white transition-colors"
             >
               <Calendar className="h-5 w-5" />
             </button>
@@ -298,7 +298,7 @@ export default function ChatInterface({ userId, firstName, studentId }: ChatInte
         </div>
 
         {/* Chat Messages */}
-        <div className="h-96 overflow-y-auto p-4 space-y-4">
+        <div className="h-[500px] overflow-y-auto p-6 space-y-4 bg-gradient-to-b from-gray-50 to-white">
           {messages.map((message) => (
             <ChatBubble key={message.id} message={message} />
           ))}
@@ -315,14 +315,14 @@ export default function ChatInterface({ userId, firstName, studentId }: ChatInte
 
         {/* Week Selector */}
         {showWeekSelector && (
-          <div className="p-4 border-t bg-gray-50">
+          <div className="p-6 border-t-2 border-gray-200 bg-gradient-to-b from-white to-gray-50">
             <WeekSelector onWeekSelect={handleWeekSelection} />
           </div>
         )}
 
         {/* Current Prompt */}
         {currentPrompt && !showWeekSelector && (
-          <div className="p-4 border-t bg-gray-50">
+          <div className="p-6 border-t-2 border-gray-200 bg-gradient-to-b from-white to-blue-50">
             <PromptCard 
               prompt={currentPrompt} 
               onResponse={handlePromptResponse}
@@ -334,7 +334,7 @@ export default function ChatInterface({ userId, firstName, studentId }: ChatInte
 
         {/* Message Input */}
         {!showWeekSelector && !currentPrompt && (
-          <div className="p-4 border-t bg-gray-50">
+          <div className="p-6 border-t-2 border-gray-200 bg-gradient-to-b from-white to-gray-50">
             <MessageInput onSendMessage={handleSendMessage} />
           </div>
         )}
