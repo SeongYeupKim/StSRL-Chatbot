@@ -13,6 +13,7 @@ interface FeedbackContext {
   component: SRLComponent;
   week: number;
   previousResponses?: string[];
+  conversationHistory?: Array<{ role: 'user' | 'bot'; content: string }>;
 }
 
 export async function generateOpenAIFeedback(context: FeedbackContext): Promise<SRLFeedback> {
@@ -25,18 +26,29 @@ export async function generateOpenAIFeedback(context: FeedbackContext): Promise<
   const userPrompt = createUserPrompt(context);
 
   try {
+    const messages: any[] = [
+      {
+        role: "system",
+        content: systemPrompt
+      }
+    ];
+
+    // Add conversation history if available
+    if (context.conversationHistory && context.conversationHistory.length > 0) {
+      messages.push(...context.conversationHistory.map(msg => ({
+        role: msg.role === 'bot' ? 'assistant' : 'user',
+        content: msg.content
+      })));
+    }
+
+    messages.push({
+      role: "user",
+      content: userPrompt
+    });
+
     const completion = await openai.chat.completions.create({
       model: "gpt-4",
-      messages: [
-        {
-          role: "system",
-          content: systemPrompt
-        },
-        {
-          role: "user",
-          content: userPrompt
-        }
-      ],
+      messages: messages,
       temperature: 0.7,
       max_tokens: 250
     });
