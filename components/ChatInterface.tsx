@@ -268,6 +268,9 @@ export default function ChatInterface({ userId, firstName, studentId }: ChatInte
     
     setCurrentPrompt(null); // Clear the current prompt
     
+    // Show loading message while generating personalized feedback
+    setCompletionMessage('Generating your personalized feedback...\n\nPlease wait a moment.');
+    
     // Generate adaptive completion message in the background
     setTimeout(async () => {
       try {
@@ -293,6 +296,7 @@ export default function ChatInterface({ userId, firstName, studentId }: ChatInte
         }
       } catch (error) {
         console.error('Error generating completion message:', error);
+        setCompletionMessage('');
       }
     }, 100);
   };
@@ -346,7 +350,14 @@ export default function ChatInterface({ userId, firstName, studentId }: ChatInte
               <p className="text-sm text-gray-700 leading-relaxed">
                 {isCompleted ? (
                   completionMessage ? (
-                    <div dangerouslySetInnerHTML={{ __html: completionMessage.replace(/\n/g, '<br />') }} />
+                    completionMessage.includes('Generating your personalized feedback') ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                        <span>{completionMessage.split('\n')[0]}</span>
+                      </div>
+                    ) : (
+                      <div dangerouslySetInnerHTML={{ __html: completionMessage.replace(/\n/g, '<br />') }} />
+                    )
                   ) : (
                     <>
                       Excellent work completing your learning session! Here are some tips to keep improving:
